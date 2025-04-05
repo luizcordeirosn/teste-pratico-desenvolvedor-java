@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 
+import com.teste.pratico.agenda.dtos.AtualizarEstacionamentoDto;
 import com.teste.pratico.agenda.dtos.EstacionamentoFiltroDto;
 import com.teste.pratico.agenda.dtos.SalvarEstacionamentoDto;
 import com.teste.pratico.agenda.entities.Estacionamento;
@@ -11,6 +12,8 @@ import com.teste.pratico.agenda.entities.Estacionamento;
 public interface EstacionamentoService {
     
     public Estacionamento salvar(SalvarEstacionamentoDto dto);
+
+    public Estacionamento atualiazr(Integer id, AtualizarEstacionamentoDto dto);
 
     public Boolean deletar(Integer id);
 

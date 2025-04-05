@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
@@ -23,6 +24,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+
 import com.teste.pratico.agenda.dtos.SalvarSolicitanteDto;
 import com.teste.pratico.agenda.entities.Solicitante;
 import com.teste.pratico.agenda.exceptions.ResourceNotFoundException;
@@ -46,7 +49,7 @@ public class SolicitanteServiceTest {
     }
 
     @Test
-    void salvarDeveSalvarComSucesso() {
+    void deveSalvarComSucesso() {
 
         when(solicitanteRepository.save(any(Solicitante.class))).thenReturn(solicitante);
 
@@ -59,7 +62,7 @@ public class SolicitanteServiceTest {
     }
 
     @Test
-    void salvarDeveLancarExceptionQuandoExistirOutroSolicitanteComMesmoCpf() {
+    void deveLancarExceptionQuandoExistirOutroSolicitanteComMesmoCpf() {
         when(solicitanteRepository.findByCpf("12345678900")).thenReturn(Optional.of(solicitante));
 
         SalvarSolicitanteDto dto = new SalvarSolicitanteDto("Luiz", "12345678900");
@@ -70,7 +73,7 @@ public class SolicitanteServiceTest {
     }
 
     @Test
-    void deletarDeveDeletarComSucesso() {
+    void deveDeletarComSucesso() {
         Integer id = 1;
 
         when(solicitanteRepository.findById(id)).thenReturn(Optional.of(solicitante));
@@ -78,25 +81,29 @@ public class SolicitanteServiceTest {
 
         assertTrue(solicitanteService.deletar(id));
 
+        verify(solicitanteRepository, times(1)).findById(id);
         verify(solicitanteRepository, times(1)).delete(any(Solicitante.class));
     }
 
     @Test 
-    void deletarDeveLancarExceptionQuandoSolicitanteNaoEncontrado() {
+    void deveLancarExceptionQuandoSolicitanteNaoEncontrado() {
         Integer id = 1;
 
         when(solicitanteRepository.findById(id)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> solicitanteService.deletar(id));
+
+        verify(solicitanteRepository, times(1)).findById(id);
+        verify(solicitanteRepository, times(0)).delete(any(Solicitante.class));
     }
 
     @Test
-    void obterTodosDeveRetornarSolicitantesPaginados() {
+    void deveRetornarSolicitantesPaginadosAoObterTodos() {
 
         Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Order.asc("id")));
         Page<Solicitante> page = new PageImpl<>(List.of(solicitante));
 
-        doReturn(page).when(solicitanteRepository).findAll(pageable);
+        when(solicitanteRepository.findAll(pageable)).thenReturn(page);
 
         Page<Solicitante> solicitantes = solicitanteService.obterTodos(0, 10);
 

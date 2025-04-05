@@ -7,8 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+import com.teste.pratico.agenda.dtos.AtualizarEstacionamentoDto;
 import com.teste.pratico.agenda.dtos.EstacionamentoFiltroDto;
 import com.teste.pratico.agenda.dtos.SalvarEstacionamentoDto;
 import com.teste.pratico.agenda.entities.Estacionamento;
@@ -37,6 +40,17 @@ public class EstacionamentoServiceImpl implements EstacionamentoService {
         }
 
         Estacionamento estacionamento = EstacionamentoMapper.dtoSalvarParaEntidade(dto);
+
+        return repository.save(estacionamento);
+    }
+
+    @Override
+    public Estacionamento atualiazr(Integer id, AtualizarEstacionamentoDto dto) {
+        logger.info("atualiazr(id: {}, dto: {})", id, dto);
+
+        Estacionamento estacionamento = obterPorId(id);
+
+        estacionamento.setStatus(dto.status());
 
         return repository.save(estacionamento);
     }
@@ -72,7 +86,7 @@ public class EstacionamentoServiceImpl implements EstacionamentoService {
         logger.info("obterTodos: {}", dto);
 
         Specification<Estacionamento> specification = EstacionamentoSpecification.filtrarEstacionamento(dto);
-        Pageable pageable = PageRequest.of(dto.pagina(), dto.tamanho());
+        Pageable pageable = PageRequest.of(dto.pagina(), dto.tamanho(), Sort.by(Sort.Order.asc("id")));
 
         return repository.findAll(specification, pageable);
     }

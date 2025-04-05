@@ -1,9 +1,12 @@
 package com.teste.pratico.agenda.controllers;
 
+import com.teste.pratico.agenda.dtos.AtualizarEstacionamentoDto;
 import com.teste.pratico.agenda.dtos.EstacionamentoFiltroDto;
 import com.teste.pratico.agenda.dtos.SalvarEstacionamentoDto;
 import com.teste.pratico.agenda.entities.Estacionamento;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,6 +25,18 @@ public interface EstacionamentoController {
     })
     @PostMapping("/vagas")
     ResponseEntity<Estacionamento> salvar(@RequestBody SalvarEstacionamentoDto dto);
+
+    @PatchMapping("/vagas/{id}")
+    @Operation(summary = "Atualizar status da vaga", description = "Atualiza o status (DISPONIVEL, RESERVADA, OCUPADA) da vaga de estacionamento")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Status atualizado com sucesso", content = @Content(schema = @Schema(implementation = Estacionamento.class))),
+        @ApiResponse(responseCode = "404", description = "Estacionamento não encontrado"),
+        @ApiResponse(responseCode = "400", description = "Requisição inválida")
+    })
+    public ResponseEntity<Estacionamento> atualizar(
+            @PathVariable Integer id,
+            @RequestBody AtualizarEstacionamentoDto dto
+    );
 
     @Operation(summary = "Deletar uma vaga de estacionamento")
     @ApiResponses(value = {

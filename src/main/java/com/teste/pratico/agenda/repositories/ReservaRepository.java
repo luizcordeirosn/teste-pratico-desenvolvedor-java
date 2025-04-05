@@ -1,0 +1,9 @@
+package com.teste.pratico.agenda.repositories;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import com.teste.pratico.agenda.entities.Reserva;
+
+public interface ReservaRepository extends JpaRepository<Reserva, Integer>, JpaSpecificationExecutor<Reserva> {
+    
+}

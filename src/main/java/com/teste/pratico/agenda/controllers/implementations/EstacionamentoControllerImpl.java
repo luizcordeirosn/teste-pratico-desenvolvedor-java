@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.teste.pratico.agenda.controllers.EstacionamentoController;
+import com.teste.pratico.agenda.dtos.AtualizarEstacionamentoDto;
 import com.teste.pratico.agenda.dtos.EstacionamentoFiltroDto;
 import com.teste.pratico.agenda.dtos.SalvarEstacionamentoDto;
 import com.teste.pratico.agenda.entities.Estacionamento;
@@ -25,6 +26,12 @@ public class EstacionamentoControllerImpl implements EstacionamentoController {
     }
 
     @Override
+    public ResponseEntity<Estacionamento> atualizar(Integer id, AtualizarEstacionamentoDto dto) {
+        Estacionamento estacionamentoAtualizado = estacionamentoService.atualiazr(id, dto);
+        return ResponseEntity.ok(estacionamentoAtualizado);
+    }
+
+    @Override
     public ResponseEntity<Boolean> deletar(Integer id) {
         Boolean resultado = estacionamentoService.deletar(id);
         return ResponseEntity.ok(resultado);
@@ -35,5 +42,4 @@ public class EstacionamentoControllerImpl implements EstacionamentoController {
         Page<Estacionamento> estacionamentos = estacionamentoService.obterTodos(filtroDto);
         return ResponseEntity.ok(estacionamentos);
     }
-    
 }
