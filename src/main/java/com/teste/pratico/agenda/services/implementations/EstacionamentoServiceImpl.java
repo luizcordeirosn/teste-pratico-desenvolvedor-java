@@ -45,8 +45,8 @@ public class EstacionamentoServiceImpl implements EstacionamentoService {
     }
 
     @Override
-    public Estacionamento atualiazr(Integer id, AtualizarEstacionamentoDto dto) {
-        logger.info("atualiazr(id: {}, dto: {})", id, dto);
+    public Estacionamento atualizar(Integer id, AtualizarEstacionamentoDto dto) {
+        logger.info("atualizar(id: {}, dto: {})", id, dto);
 
         Estacionamento estacionamento = obterPorId(id);
 

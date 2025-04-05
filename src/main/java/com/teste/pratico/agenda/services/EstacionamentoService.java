@@ -13,7 +13,7 @@ public interface EstacionamentoService {
     
     public Estacionamento salvar(SalvarEstacionamentoDto dto);
 
-    public Estacionamento atualiazr(Integer id, AtualizarEstacionamentoDto dto);
+    public Estacionamento atualizar(Integer id, AtualizarEstacionamentoDto dto);
 
     public Boolean deletar(Integer id);
 

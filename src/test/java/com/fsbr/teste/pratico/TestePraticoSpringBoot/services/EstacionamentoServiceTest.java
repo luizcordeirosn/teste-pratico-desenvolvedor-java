@@ -10,7 +10,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +24,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-
 import com.teste.pratico.agenda.dtos.AtualizarEstacionamentoDto;
 import com.teste.pratico.agenda.dtos.EstacionamentoFiltroDto;
 import com.teste.pratico.agenda.dtos.SalvarEstacionamentoDto;
@@ -85,7 +83,7 @@ public class EstacionamentoServiceTest {
 
         AtualizarEstacionamentoDto dto = new AtualizarEstacionamentoDto(StatusVagaEnum.OCUPADA);
 
-        Estacionamento estacionamentoAtualizado = estacionamentoService.atualiazr(id, dto);
+        Estacionamento estacionamentoAtualizado = estacionamentoService.atualizar(id, dto);
 
         assertNotNull(estacionamentoAtualizado);
         assertEquals(StatusVagaEnum.OCUPADA, estacionamentoAtualizado.getStatus());
@@ -102,7 +100,7 @@ public class EstacionamentoServiceTest {
 
         AtualizarEstacionamentoDto dto = new AtualizarEstacionamentoDto(StatusVagaEnum.OCUPADA);
 
-        assertThrows(ResourceNotFoundException.class, () -> estacionamentoService.atualiazr(id, dto));
+        assertThrows(ResourceNotFoundException.class, () -> estacionamentoService.atualizar(id, dto));
 
         verify(estacionamentoRepository, times(1)).findById(id);
         verify(estacionamentoRepository, times(0)).save(any(Estacionamento.class));
@@ -138,16 +136,18 @@ public class EstacionamentoServiceTest {
     @Test
     void deveRetornarEstacionamentosPaginadosAoObterTodos(){
 
-        EstacionamentoFiltroDto dto = new EstacionamentoFiltroDto("comum", StatusVagaEnum.DISPONIVEL, 0, 10);
-        Pageable pageable = PageRequest.of(dto.pagina(), dto.tamanho(), Sort.by(Sort.Order.asc("id")));
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Order.asc("id")));
         Page<Estacionamento> page = new PageImpl<>(List.of(estacionamento));
 
         when(estacionamentoRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(page);
+
+        EstacionamentoFiltroDto dto = new EstacionamentoFiltroDto("comum", StatusVagaEnum.DISPONIVEL, 0, 10);
 
         Page<Estacionamento> estacionamentos = estacionamentoService.obterTodos(dto);
 
         assertNotNull(estacionamentos);
         assertEquals(1, estacionamentos.getTotalElements());
+        
         verify(estacionamentoRepository, times(1)).findAll(any(Specification.class), eq(pageable));
     }
 }

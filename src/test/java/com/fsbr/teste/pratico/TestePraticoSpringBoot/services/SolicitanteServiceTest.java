@@ -24,8 +24,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
-
 import com.teste.pratico.agenda.dtos.SalvarSolicitanteDto;
 import com.teste.pratico.agenda.entities.Solicitante;
 import com.teste.pratico.agenda.exceptions.ResourceNotFoundException;
