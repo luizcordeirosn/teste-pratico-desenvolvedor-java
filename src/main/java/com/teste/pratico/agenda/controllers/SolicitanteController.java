@@ -6,12 +6,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@RequestMapping("api/solicitante")
+@RequestMapping("api/solicitantes")
 @Tag(name = "Solicitante", description = "Endpoints para gerenciar solicitantes")
 public interface SolicitanteController {
 

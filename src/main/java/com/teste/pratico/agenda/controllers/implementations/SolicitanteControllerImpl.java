@@ -1,4 +1,4 @@
-package com.teste.pratico.agenda.controllers.implemations;
+package com.teste.pratico.agenda.controllers.implementations;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
