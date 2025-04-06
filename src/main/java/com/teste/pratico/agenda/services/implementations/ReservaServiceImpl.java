@@ -43,7 +43,6 @@ public class ReservaServiceImpl implements ReservaService {
     private final ReservaRepository repository;
     private final EstacionamentoService estacionamentoService;
     private final SolicitanteService solicitanteService;
-
     private final SalvarReservaDtoValidator salvarReservaDtoValidator;
     private final EncerrarReservaDtoValidator encerrarReservaDtoValidator;
 

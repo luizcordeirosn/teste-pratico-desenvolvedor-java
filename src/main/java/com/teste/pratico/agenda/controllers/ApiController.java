@@ -12,11 +12,13 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@SecurityRequirement(name = "BearerAuth")
 @Tag(name = "API", description = "Endpoints para gerenciar vagas de estacionamentos e reservas")
 @RequestMapping("/api/v1")
 public interface ApiController {
@@ -24,7 +26,8 @@ public interface ApiController {
     @Operation(summary = "Salvar uma nova vaga de estacionamento")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = "Vaga de estacionamento criada com sucesso"),
-        @ApiResponse(responseCode = "400", description = "Erro de validação dos dados")
+        @ApiResponse(responseCode = "400", description = "Erro de validação dos dados"),
+        @ApiResponse(responseCode = "401", description = "Acesso Negado")
     })
     @PostMapping("/vagas")
     ResponseEntity<Estacionamento> salvarEstacionamento(@RequestBody SalvarEstacionamentoDto dto);
@@ -33,8 +36,9 @@ public interface ApiController {
     @Operation(summary = "Atualizar status da vaga", description = "Atualiza o status (DISPONIVEL, RESERVADA, OCUPADA) da vaga de estacionamento")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Status atualizado com sucesso", content = @Content(schema = @Schema(implementation = Estacionamento.class))),
+        @ApiResponse(responseCode = "400", description = "Requisição inválida"),
+        @ApiResponse(responseCode = "401", description = "Acesso Negado"),
         @ApiResponse(responseCode = "404", description = "Estacionamento não encontrado"),
-        @ApiResponse(responseCode = "400", description = "Requisição inválida")
     })
     public ResponseEntity<Estacionamento> atualizarEstacionamento(
             @PathVariable Integer id,
@@ -44,6 +48,7 @@ public interface ApiController {
     @Operation(summary = "Deletar uma vaga de estacionamento")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "204", description = "Vaga de estacionamento deletado com sucesso"),
+        @ApiResponse(responseCode = "401", description = "Acesso Negado"),
         @ApiResponse(responseCode = "404", description = "Vaga de estacionamento não encontrado")
     })
     @DeleteMapping("/vagas/{id}")
@@ -52,7 +57,8 @@ public interface ApiController {
     @Operation(summary = "Listar vagas de estacionamentos com filtro e paginação")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Vagas de estacionamentos listados com sucesso"),
-        @ApiResponse(responseCode = "400", description = "Requisição inválida. Verifique os parâmetros e tente novamente.")
+        @ApiResponse(responseCode = "400", description = "Requisição inválida. Verifique os parâmetros e tente novamente."),
+        @ApiResponse(responseCode = "401", description = "Acesso Negado"),
     })
     @GetMapping("/vagas")
     ResponseEntity<Page<Estacionamento>> obterTodosEstacionamentos(
@@ -66,6 +72,7 @@ public interface ApiController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = "Reserva criada com sucesso", content = @Content(schema = @Schema(implementation = Reserva.class))),
         @ApiResponse(responseCode = "400", description = "Vaga já está ocupada ou reservada"),
+        @ApiResponse(responseCode = "401", description = "Acesso Negado"),
         @ApiResponse(responseCode = "404", description = "Estacionamento ou solicitante não encontrado")
     })
     @PostMapping("/reservas")
@@ -75,6 +82,7 @@ public interface ApiController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Reserva encerrada com sucesso", content = @Content(schema = @Schema(implementation = Reserva.class))),
         @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+        @ApiResponse(responseCode = "401", description = "Acesso Negado"),
         @ApiResponse(responseCode = "404", description = "Reserva não encontrada")
     })
     @PatchMapping("/reservas/{id}/encerrar")
@@ -83,7 +91,8 @@ public interface ApiController {
     @Operation(summary = "Listar reservas com filtros e paginação", description = "Retorna uma lista paginada de reservas com base nos filtros aplicados")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Reservas listadas com sucesso"),
-        @ApiResponse(responseCode = "400", description = "Requisição inválida. Verifique os parâmetros e tente novamente.")
+        @ApiResponse(responseCode = "400", description = "Requisição inválida. Verifique os parâmetros e tente novamente."),
+        @ApiResponse(responseCode = "401", description = "Acesso Negado")
     })
     @GetMapping("/reservas")
     public ResponseEntity<Page<Reserva>> obterTodosReservas(

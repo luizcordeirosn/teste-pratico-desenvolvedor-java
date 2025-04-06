@@ -67,9 +67,12 @@ public class ReservaServiceTest {
     private Solicitante solicitante;
     private Reserva reserva;
 
-    private final Integer id = 1;
-    private final Integer estacionamentoId = 2;
-    private final Integer solicitanteId = 3;
+    private static final String RESERVA_MULTIPLAS_EXCEPTION_MESSAGE = "Não é permitido que o mesmo solicitante tenha mais de uma vaga reservada ou ocupada simultaneamente.";
+    private static final String RESERVA_FUTURA_DATA_INICIO_EXCEPTION_MESSAGE = "Não é possível agendar para datas posteriores ao dia atual.";
+    private static final String RESERVA_PASSADA_DATA_INICIO_EXCEPTION_MESSAGE = "A data de início não pode ser anterior à data atual.";
+    private static final String VAGA_INDISPONIVEL_EXCEPTION_MESSAGE = "A vaga de estacionamento está reservada ou ocupada.";
+    private static final String ILLEGAL_ARGUMENT_EXCEPTION_MESSAGE = "Esta reserva já foi encerrada anteriormente.";
+    private static final String RESERVA_PASSADA_DATA_FIM_EXCEPTION_MESSAGE = "A data de encerramento não pode ser anterior à data atual.";
 
     @BeforeEach
     void setUp() {
@@ -115,10 +118,8 @@ public class ReservaServiceTest {
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> reservaService.salvar(dto));
-                
-        assertEquals(
-                "Não é permitido que o mesmo solicitante tenha mais de uma vaga reservada ou ocupada simultaneamente.",
-                exception.getMessage());
+
+        assertEquals(RESERVA_MULTIPLAS_EXCEPTION_MESSAGE, exception.getMessage());
 
         verify(salvarReservaDtoValidator, times(1)).validate(eq(dto), any(Errors.class));
     }
@@ -138,7 +139,7 @@ public class ReservaServiceTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> reservaService.salvar(dto));
 
-        assertEquals("Não é possível agendar para datas posteriores ao dia atual.", exception.getMessage());
+        assertEquals(RESERVA_FUTURA_DATA_INICIO_EXCEPTION_MESSAGE, exception.getMessage());
 
         verify(salvarReservaDtoValidator, times(1)).validate(eq(dto), any(Errors.class));
     }
@@ -158,7 +159,7 @@ public class ReservaServiceTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> reservaService.salvar(dto));
 
-        assertEquals("A data de início não pode ser anterior à data atual.", exception.getMessage());
+        assertEquals(RESERVA_PASSADA_DATA_INICIO_EXCEPTION_MESSAGE, exception.getMessage());
 
         verify(salvarReservaDtoValidator, times(1)).validate(eq(dto), any(Errors.class));
     }
@@ -166,10 +167,10 @@ public class ReservaServiceTest {
     @Test
     void deveLancarExceptionAoSalvarReservaQuandoVagaNaoEstiverDisponivel() {
 
-        estacionamento.setId(estacionamentoId);
+        estacionamento.setId(2);
         estacionamento.setStatus(StatusVagaEnum.OCUPADA);
 
-        SalvarReservaDto dto = new SalvarReservaDto(estacionamentoId, solicitanteId, LocalDate.now().toString());
+        SalvarReservaDto dto = new SalvarReservaDto(2, 3, LocalDate.now().toString());
 
         doAnswer(invocation -> {
             Errors errors = invocation.getArgument(1);
@@ -180,7 +181,7 @@ public class ReservaServiceTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> reservaService.salvar(dto));
 
-        assertEquals("A vaga de estacionamento está reservada ou ocupada.", exception.getMessage());
+        assertEquals(VAGA_INDISPONIVEL_EXCEPTION_MESSAGE, exception.getMessage());
 
         verify(salvarReservaDtoValidator, times(1)).validate(eq(dto), any(Errors.class));
     }
@@ -192,16 +193,16 @@ public class ReservaServiceTest {
         EncerrarReservaDto dto = new EncerrarReservaDto(LocalDate.now().toString());
 
         doAnswer(invocation -> null).when(encerrarReservaDtoValidator).validate(eq(dto), any(Errors.class));
-        when(reservaRepository.findById(id)).thenReturn(Optional.of(reserva));
+        when(reservaRepository.findById(1)).thenReturn(Optional.of(reserva));
         when(estacionamentoService.atualizar(1, new AtualizarEstacionamentoDto(StatusVagaEnum.DISPONIVEL)))
                 .thenReturn(estacionamento);
         when(reservaRepository.save(any(Reserva.class))).thenReturn(reserva);
 
-        Reserva reservaEncerrada = reservaService.encerrarReserva(id, dto);
+        Reserva reservaEncerrada = reservaService.encerrarReserva(1, dto);
 
         assertNotNull(reservaEncerrada);
 
-        verify(reservaRepository, times(1)).findById(id);
+        verify(reservaRepository, times(1)).findById(1);
         verify(estacionamentoService, times(1))
                 .atualizar(1, new AtualizarEstacionamentoDto(StatusVagaEnum.DISPONIVEL));
         verify(reservaRepository, times(1)).save(any(Reserva.class));
@@ -216,14 +217,14 @@ public class ReservaServiceTest {
         EncerrarReservaDto dto = new EncerrarReservaDto(LocalDate.now().toString());
 
         doAnswer(invocation -> null).when(encerrarReservaDtoValidator).validate(eq(dto), any(Errors.class));
-        when(reservaRepository.findById(id)).thenReturn(Optional.of(reserva));
+        when(reservaRepository.findById(1)).thenReturn(Optional.of(reserva));
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> reservaService.encerrarReserva(id, dto));
+                () -> reservaService.encerrarReserva(1, dto));
 
-        assertEquals("Esta reserva já foi encerrada anteriormente.", exception.getMessage());
+        assertEquals(ILLEGAL_ARGUMENT_EXCEPTION_MESSAGE, exception.getMessage());
 
-        verify(reservaRepository, times(1)).findById(id);
+        verify(reservaRepository, times(1)).findById(1);
         verify(estacionamentoService, times(0))
                 .atualizar(eq(estacionamento.getId()), any(AtualizarEstacionamentoDto.class));
         verify(reservaRepository, times(0)).save(any(Reserva.class));
@@ -245,9 +246,9 @@ public class ReservaServiceTest {
         }).when(encerrarReservaDtoValidator).validate(eq(dto), any(Errors.class));
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> reservaService.encerrarReserva(id, dto));
+                () -> reservaService.encerrarReserva(1, dto));
 
-        assertEquals("A data de encerramento não pode ser anterior à data atual.", exception.getMessage());
+        assertEquals(RESERVA_PASSADA_DATA_FIM_EXCEPTION_MESSAGE, exception.getMessage());
 
         verify(estacionamentoService, times(0))
                 .atualizar(eq(estacionamento.getId()), any(AtualizarEstacionamentoDto.class));

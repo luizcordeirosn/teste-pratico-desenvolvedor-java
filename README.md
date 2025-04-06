@@ -12,6 +12,7 @@ O objetivo principal é aplicar boas práticas de desenvolvimento, arquitetura l
 
 A estrutura do projeto foi dividida em pacotes organizados por responsabilidades:
 
+- **`configs`**: configurações gerais da aplicação, como segurança, CORS, beans e outras definições globais.
 - **`controllers`**: camada responsável por receber as requisições HTTP e retornar as respostas adequadas.
 - **`dtos`**: definidos como `records` para imutabilidade e simplicidade na transferência de dados entre camadas.
 - **`entities`**: representam as tabelas do banco de dados. Não utilizam anotações do Lombok para manter a orientação a objetos pura.
@@ -20,6 +21,7 @@ A estrutura do projeto foi dividida em pacotes organizados por responsabilidades
 - **`handlers`**: captura e formata as exceções lançadas na aplicação.
 - **`mappers`**: classes responsáveis por conversão entre entidades e DTOs.
 - **`repositories`**: interfaces que interagem com o banco de dados via JPA.
+- **`security`**: implementação da autenticação via JWT, filtros e configurações de segurança com Spring Security.
 - **`services`**: contém a lógica de negócio da aplicação.
 - **`specifications`**: filtros dinâmicos utilizando `Specification` do Spring Data.
 - **`utils`**: funções auxiliares reutilizáveis.
@@ -80,6 +82,23 @@ public class Solicitante {
     private Integer id;
     private String nome;
     private String cpf;
+}
+```
+
+### Usuário
+
+```java
+@Entity
+@Table(name = "USUARIO")
+public class Usuario {
+
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+    private String email;
+    private String senha;
+
+    @ManyToOne @JoinColumn(name = "SOLICITANTE_ID")
+    private Solicitante solicitante;
 }
 ```
 
