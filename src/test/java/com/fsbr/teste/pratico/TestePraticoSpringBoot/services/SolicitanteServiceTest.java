@@ -47,7 +47,7 @@ public class SolicitanteServiceTest {
 
     private Solicitante solicitante;
 
-    private final Integer id = 1;
+    private static final String CPF_DUPLICADO_EXCEPTION_MESSAGE = "CPF já cadastrado na base de dados.";
 
     @BeforeEach
     void setUp() {
@@ -84,7 +84,7 @@ public class SolicitanteServiceTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> solicitanteService.salvar(dto));
 
-        assertEquals("CPF já cadastrado na base de dados.", exception.getMessage());
+        assertEquals(CPF_DUPLICADO_EXCEPTION_MESSAGE, exception.getMessage());
 
         verify(salvarSolicitanteDtoValidator, times(1)).validate(eq(dto), any(Errors.class));
         verify(solicitanteRepository, times(0)).save(any(Solicitante.class));
@@ -93,25 +93,25 @@ public class SolicitanteServiceTest {
     @Test
     void deveDeletarComSucesso() {
 
-        when(solicitanteRepository.findById(id)).thenReturn(Optional.of(solicitante));
+        when(solicitanteRepository.findById(1)).thenReturn(Optional.of(solicitante));
         doNothing().when(solicitanteRepository).delete(any(Solicitante.class));
 
-        Boolean resultado = solicitanteService.deletar(id);
+        Boolean resultado = solicitanteService.deletar(1);
 
         assertTrue(resultado);
 
-        verify(solicitanteRepository, times(1)).findById(id);
+        verify(solicitanteRepository, times(1)).findById(1);
         verify(solicitanteRepository, times(1)).delete(any(Solicitante.class));
     }
 
     @Test
     void deveLancarExceptionQuandoSolicitanteNaoEncontrado() {
 
-        when(solicitanteRepository.findById(id)).thenReturn(Optional.empty());
+        when(solicitanteRepository.findById(1)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> solicitanteService.deletar(id));
+        assertThrows(ResourceNotFoundException.class, () -> solicitanteService.deletar(1));
 
-        verify(solicitanteRepository, times(1)).findById(id);
+        verify(solicitanteRepository, times(1)).findById(1);
         verify(solicitanteRepository, times(0)).delete(any(Solicitante.class));
     }
 

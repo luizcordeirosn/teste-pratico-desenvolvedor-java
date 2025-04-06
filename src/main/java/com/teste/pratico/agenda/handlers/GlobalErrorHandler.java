@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.teste.pratico.agenda.dtos.ErrorDto;
 import com.teste.pratico.agenda.exceptions.ResourceNotFoundException;
+import com.teste.pratico.agenda.exceptions.UnauthorizedException;
 
 @ControllerAdvice
 public class GlobalErrorHandler {
@@ -16,7 +17,8 @@ public class GlobalErrorHandler {
     public ResponseEntity<ErrorDto> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
-                .body(new ErrorDto("Erro: Ocorreu uma violação de integridade nos dados fornecidos. Detalhes: " + ex.getMessage()));
+                .body(new ErrorDto("Erro: Ocorreu uma violação de integridade nos dados fornecidos. Detalhes: "
+                        + ex.getMessage()));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
@@ -29,6 +31,11 @@ public class GlobalErrorHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorDto> handleResourceNotFoundException(ResourceNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorDto(ex.getMessage()));
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ErrorDto> handleUnauthorizedException(UnauthorizedException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorDto(ex.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)

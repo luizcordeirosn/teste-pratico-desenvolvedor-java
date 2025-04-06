@@ -28,9 +28,8 @@ import lombok.RequiredArgsConstructor;
 public class SolicitanteServiceImpl implements SolicitanteService{
 
     private static final Logger logger = LoggerFactory.getLogger(SolicitanteServiceImpl.class);
-
+    
     private final SolicitanteRepository repository;
-
     private final SalvarSolicitanteDtoValidator salvarSolicitanteDtoValidator;
 
     @Override

@@ -50,8 +50,8 @@ public class EstacionamentoServiceTest {
     private EstacionamentoServiceImpl estacionamentoService;
 
     private Estacionamento estacionamento;
-
-    private final Integer id = 1;
+    
+    private static final String RESOURCE_NOT_FOUND_EXPECTION_MESSAGE = "Estacionamento não encontrado para o ID fornecido.";
 
     @BeforeEach
     void setUp() {
@@ -96,15 +96,15 @@ public class EstacionamentoServiceTest {
 
         AtualizarEstacionamentoDto dto = new AtualizarEstacionamentoDto(StatusVagaEnum.OCUPADA);
 
-        when(estacionamentoRepository.findById(id)).thenReturn(Optional.of(estacionamento));
+        when(estacionamentoRepository.findById(1)).thenReturn(Optional.of(estacionamento));
         when(estacionamentoRepository.save(any(Estacionamento.class))).thenReturn(estacionamento);
 
-        Estacionamento estacionamentoAtualizado = estacionamentoService.atualizar(id, dto);
+        Estacionamento estacionamentoAtualizado = estacionamentoService.atualizar(1, dto);
 
         assertNotNull(estacionamentoAtualizado);
         assertEquals(StatusVagaEnum.OCUPADA, estacionamentoAtualizado.getStatus());
 
-        verify(estacionamentoRepository, times(1)).findById(id);
+        verify(estacionamentoRepository, times(1)).findById(1);
         verify(estacionamentoRepository, times(1)).save(any(Estacionamento.class));
     }
 
@@ -113,42 +113,42 @@ public class EstacionamentoServiceTest {
 
         AtualizarEstacionamentoDto dto = new AtualizarEstacionamentoDto(StatusVagaEnum.OCUPADA);
 
-        when(estacionamentoRepository.findById(id)).thenReturn(Optional.empty());
+        when(estacionamentoRepository.findById(1)).thenReturn(Optional.empty());
 
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
-                () -> estacionamentoService.atualizar(id, dto));
+                () -> estacionamentoService.atualizar(1, dto));
 
-        assertEquals("Estacionamento não encontrado para o ID fornecido.", exception.getMessage());
+        assertEquals(RESOURCE_NOT_FOUND_EXPECTION_MESSAGE, exception.getMessage());
 
-        verify(estacionamentoRepository, times(1)).findById(id);
+        verify(estacionamentoRepository, times(1)).findById(1);
         verify(estacionamentoRepository, times(0)).save(any(Estacionamento.class));
     }
 
     @Test
     void deveDeletarComSucesso() {
 
-        when(estacionamentoRepository.findById(id)).thenReturn(Optional.of(estacionamento));
+        when(estacionamentoRepository.findById(1)).thenReturn(Optional.of(estacionamento));
         doNothing().when(estacionamentoRepository).delete(any(Estacionamento.class));
 
-        Boolean resultado = estacionamentoService.deletar(id);
+        Boolean resultado = estacionamentoService.deletar(1);
 
         assertTrue(resultado);
 
-        verify(estacionamentoRepository, times(1)).findById(id);
+        verify(estacionamentoRepository, times(1)).findById(1);
         verify(estacionamentoRepository, times(1)).delete(any(Estacionamento.class));
     }
 
     @Test
     void deveLancarExceptionQuandoEstacionamentoNaoEncontrado() {
 
-        when(estacionamentoRepository.findById(id)).thenReturn(Optional.empty());
+        when(estacionamentoRepository.findById(1)).thenReturn(Optional.empty());
 
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
-                () -> estacionamentoService.deletar(id));
+                () -> estacionamentoService.deletar(1));
 
-        assertEquals("Estacionamento não encontrado para o ID fornecido.", exception.getMessage());
+        assertEquals(RESOURCE_NOT_FOUND_EXPECTION_MESSAGE, exception.getMessage());
 
-        verify(estacionamentoRepository, times(1)).findById(id);
+        verify(estacionamentoRepository, times(1)).findById(1);
         verify(estacionamentoRepository, times(0)).delete(any(Estacionamento.class));
     }
 

@@ -33,7 +33,6 @@ public class EstacionamentoServiceImpl implements EstacionamentoService {
     private static final Logger logger = LoggerFactory.getLogger(EstacionamentoServiceImpl.class);
 
     private final EstacionamentoRepository repository;
-
     private final SalvarEstacionamentoDtoValidator salvarEstacionamentoDtoValidator;
 
     @Override
