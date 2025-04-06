@@ -1,6 +1,5 @@
 package com.teste.pratico.agenda.controllers.implementations;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,62 +8,59 @@ import com.teste.pratico.agenda.controllers.ApiController;
 import com.teste.pratico.agenda.dtos.AtualizarEstacionamentoDto;
 import com.teste.pratico.agenda.dtos.EncerrarReservaDto;
 import com.teste.pratico.agenda.dtos.EstacionamentoFiltroDto;
+import com.teste.pratico.agenda.dtos.PaginacaoDataDto;
 import com.teste.pratico.agenda.dtos.ReservaFiltroDto;
 import com.teste.pratico.agenda.dtos.SalvarEstacionamentoDto;
 import com.teste.pratico.agenda.dtos.SalvarReservaDto;
 import com.teste.pratico.agenda.entities.Estacionamento;
 import com.teste.pratico.agenda.entities.Reserva;
+import com.teste.pratico.agenda.enums.StatusVagaEnum;
 import com.teste.pratico.agenda.services.EstacionamentoService;
 import com.teste.pratico.agenda.services.ReservaService;
 
+import lombok.RequiredArgsConstructor;
+
 @RestController
+@RequiredArgsConstructor
 public class ApiControllerImpl implements ApiController {
 
-    @Autowired
-    private EstacionamentoService estacionamentoService;
-
-    @Autowired
-    private ReservaService reservaService;
+    private final EstacionamentoService estacionamentoService;
+    private final ReservaService reservaService;
 
     @Override
     public ResponseEntity<Estacionamento> salvarEstacionamento(SalvarEstacionamentoDto dto) {
-        Estacionamento estacionamentoSalvo = estacionamentoService.salvar(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(estacionamentoSalvo);
+        return ResponseEntity.status(HttpStatus.CREATED).body(estacionamentoService.salvar(dto));
     }
 
     @Override
     public ResponseEntity<Estacionamento> atualizarEstacionamento(Integer id, AtualizarEstacionamentoDto dto) {
-        Estacionamento estacionamentoAtualizado = estacionamentoService.atualizar(id, dto);
-        return ResponseEntity.ok(estacionamentoAtualizado);
+        return ResponseEntity.ok(estacionamentoService.atualizar(id, dto));
     }
 
     @Override
     public ResponseEntity<Boolean> deletarEstacionamento(Integer id) {
-        Boolean resultado = estacionamentoService.deletar(id);
-        return ResponseEntity.ok(resultado);
+        return ResponseEntity.ok(estacionamentoService.deletar(id));
     }
 
     @Override
-    public ResponseEntity<Page<Estacionamento>> obterTodosEstacionamentos(EstacionamentoFiltroDto filtroDto) {
-        Page<Estacionamento> estacionamentos = estacionamentoService.obterTodos(filtroDto);
-        return ResponseEntity.ok(estacionamentos);
+    public ResponseEntity<Page<Estacionamento>> obterTodosEstacionamentos(String tipo, StatusVagaEnum status,
+            Integer pagina, Integer tamanho) {
+        return ResponseEntity.ok(estacionamentoService.obterTodos(new EstacionamentoFiltroDto(tipo, status, new PaginacaoDataDto(pagina, tamanho))));
     }
 
     @Override
     public ResponseEntity<Reserva> salvarReserva(SalvarReservaDto dto) {
-        Reserva reservaSalva = reservaService.salvar(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(reservaSalva);
+        return ResponseEntity.status(HttpStatus.CREATED).body(reservaService.salvar(dto));
     }
 
     @Override
     public ResponseEntity<Reserva> encerrarReserva(Integer id, EncerrarReservaDto dto) {
-        Reserva reservaEncerrada = reservaService.encerrarReserva(id, dto);
-        return ResponseEntity.ok(reservaEncerrada);
+        return ResponseEntity.ok(reservaService.encerrarReserva(id, dto));
     }
 
     @Override
-    public ResponseEntity<Page<Reserva>> obterTodosReservas(ReservaFiltroDto dto) {
-        Page<Reserva> reservas = reservaService.obterTodos(dto);
-        return ResponseEntity.ok(reservas);
+    public ResponseEntity<Page<Reserva>> obterTodosReservas(Integer solicitanteId, Integer pagina, Integer tamanho) {
+        return ResponseEntity.ok(
+                reservaService.obterTodos(new ReservaFiltroDto(solicitanteId, new PaginacaoDataDto(pagina, tamanho))));
     }
 }

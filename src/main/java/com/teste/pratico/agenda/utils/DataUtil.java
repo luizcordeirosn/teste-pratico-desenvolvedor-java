@@ -26,6 +26,10 @@ public class DataUtil {
         return data.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
     }
 
+    public static Timestamp localDateParaTimestamp(LocalDate data) {
+        return Timestamp.valueOf(data.atStartOfDay());
+    }
+
     public static Integer calcularDiasEntre(LocalDate inicio, LocalDate fim) {
 
         return (int) ChronoUnit.DAYS.between(inicio, fim);

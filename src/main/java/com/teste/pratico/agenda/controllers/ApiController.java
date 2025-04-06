@@ -2,13 +2,11 @@ package com.teste.pratico.agenda.controllers;
 
 import com.teste.pratico.agenda.dtos.AtualizarEstacionamentoDto;
 import com.teste.pratico.agenda.dtos.EncerrarReservaDto;
-import com.teste.pratico.agenda.dtos.EstacionamentoFiltroDto;
-import com.teste.pratico.agenda.dtos.ReservaFiltroDto;
 import com.teste.pratico.agenda.dtos.SalvarEstacionamentoDto;
 import com.teste.pratico.agenda.dtos.SalvarReservaDto;
 import com.teste.pratico.agenda.entities.Estacionamento;
 import com.teste.pratico.agenda.entities.Reserva;
-
+import com.teste.pratico.agenda.enums.StatusVagaEnum;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -20,12 +18,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "API", description = "Endpoints para gerenciar vagas de estacionamentos e reservas")
-@RequestMapping("/api")
+@RequestMapping("/api/v1")
 public interface ApiController {
 
     @Operation(summary = "Salvar uma nova vaga de estacionamento")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Vaga de estacionamento criada com sucesso"),
+        @ApiResponse(responseCode = "201", description = "Vaga de estacionamento criada com sucesso"),
         @ApiResponse(responseCode = "400", description = "Erro de validação dos dados")
     })
     @PostMapping("/vagas")
@@ -53,14 +51,20 @@ public interface ApiController {
 
     @Operation(summary = "Listar vagas de estacionamentos com filtro e paginação")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Vagas de estacionamentos listados com sucesso")
+        @ApiResponse(responseCode = "200", description = "Vagas de estacionamentos listados com sucesso"),
+        @ApiResponse(responseCode = "400", description = "Requisição inválida. Verifique os parâmetros e tente novamente.")
     })
     @GetMapping("/vagas")
-    ResponseEntity<Page<Estacionamento>> obterTodosEstacionamentos(@ModelAttribute EstacionamentoFiltroDto filtroDto);
+    ResponseEntity<Page<Estacionamento>> obterTodosEstacionamentos(
+        @RequestParam(required = false, defaultValue = "") String tipo,
+        @RequestParam(required = false, defaultValue = "DISPONIVEL") StatusVagaEnum status,
+        @RequestParam(required = false, defaultValue = "0") Integer pagina,
+        @RequestParam(required = false, defaultValue = "10") Integer tamanho
+    );
 
     @Operation(summary = "Criar uma nova reserva de estacionamento")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Reserva criada com sucesso", content = @Content(schema = @Schema(implementation = Reserva.class))),
+        @ApiResponse(responseCode = "201", description = "Reserva criada com sucesso", content = @Content(schema = @Schema(implementation = Reserva.class))),
         @ApiResponse(responseCode = "400", description = "Vaga já está ocupada ou reservada"),
         @ApiResponse(responseCode = "404", description = "Estacionamento ou solicitante não encontrado")
     })
@@ -78,8 +82,13 @@ public interface ApiController {
 
     @Operation(summary = "Listar reservas com filtros e paginação", description = "Retorna uma lista paginada de reservas com base nos filtros aplicados")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Reservas listadas com sucesso")
+        @ApiResponse(responseCode = "200", description = "Reservas listadas com sucesso"),
+        @ApiResponse(responseCode = "400", description = "Requisição inválida. Verifique os parâmetros e tente novamente.")
     })
     @GetMapping("/reservas")
-    public ResponseEntity<Page<Reserva>> obterTodosReservas(@ModelAttribute ReservaFiltroDto dto);
+    public ResponseEntity<Page<Reserva>> obterTodosReservas(
+        @RequestParam(required = false) Integer solicitanteId,
+        @RequestParam(required = false, defaultValue = "0") Integer pagina,
+        @RequestParam(required = false, defaultValue = "10") Integer tamanho
+    );
 }

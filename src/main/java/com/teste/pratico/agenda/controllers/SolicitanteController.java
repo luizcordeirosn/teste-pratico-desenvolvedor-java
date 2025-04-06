@@ -10,7 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@RequestMapping("api/solicitantes")
+@RequestMapping("api/v1/solicitantes")
 @Tag(name = "Solicitante", description = "Endpoints para gerenciar solicitantes")
 public interface SolicitanteController {
 
@@ -32,7 +32,8 @@ public interface SolicitanteController {
 
     @Operation(summary = "Obter todos os solicitantes paginados")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Lista de solicitantes retornada com sucesso")
+        @ApiResponse(responseCode = "200", description = "Lista de solicitantes retornada com sucesso"),
+        @ApiResponse(responseCode = "400", description = "Requisição inválida. Verifique os parâmetros e tente novamente.")
     })
     @GetMapping
     ResponseEntity<Page<Solicitante>> obterTodos(

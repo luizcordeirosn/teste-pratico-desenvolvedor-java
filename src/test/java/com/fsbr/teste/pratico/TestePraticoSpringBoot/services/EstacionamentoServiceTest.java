@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -24,25 +25,33 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.validation.Errors;
 import com.teste.pratico.agenda.dtos.AtualizarEstacionamentoDto;
 import com.teste.pratico.agenda.dtos.EstacionamentoFiltroDto;
+import com.teste.pratico.agenda.dtos.PaginacaoDataDto;
 import com.teste.pratico.agenda.dtos.SalvarEstacionamentoDto;
 import com.teste.pratico.agenda.entities.Estacionamento;
 import com.teste.pratico.agenda.enums.StatusVagaEnum;
 import com.teste.pratico.agenda.exceptions.ResourceNotFoundException;
 import com.teste.pratico.agenda.repositories.EstacionamentoRepository;
 import com.teste.pratico.agenda.services.implementations.EstacionamentoServiceImpl;
+import com.teste.pratico.agenda.validators.SalvarEstacionamentoDtoValidator;
 
 @ExtendWith(MockitoExtension.class)
 public class EstacionamentoServiceTest {
-    
+
     @Mock
     private EstacionamentoRepository estacionamentoRepository;
+
+    @Mock
+    private SalvarEstacionamentoDtoValidator salvarEstacionamentoDtoValidator;
 
     @InjectMocks
     private EstacionamentoServiceImpl estacionamentoService;
 
     private Estacionamento estacionamento;
+
+    private final Integer id = 1;
 
     @BeforeEach
     void setUp() {
@@ -51,37 +60,44 @@ public class EstacionamentoServiceTest {
 
     @Test
     void deveSalvarComSucesso() {
-        when(estacionamentoRepository.save(any(Estacionamento.class))).thenReturn(estacionamento);
 
         SalvarEstacionamentoDto dto = new SalvarEstacionamentoDto(1.0, "comum", 15.0);
+
+        doAnswer(invocation -> null).when(salvarEstacionamentoDtoValidator).validate(eq(dto), any(Errors.class));
+        when(estacionamentoRepository.save(any(Estacionamento.class))).thenReturn(estacionamento);
 
         Estacionamento estacionamentoSalvo = estacionamentoService.salvar(dto);
 
         assertNotNull(estacionamentoSalvo);
+
         verify(estacionamentoRepository, times(1)).save(any(Estacionamento.class));
+        verify(salvarEstacionamentoDtoValidator, times(1)).validate(eq(dto), any(Errors.class));
     }
 
     @Test
     void deveLancarExceptionAoSalvarQuandoNumeroJaEstiverRegistrado() {
-        Double numero = 1.0;
-
-        when(estacionamentoRepository.findByNumero(numero)).thenReturn(Optional.of(estacionamento));
 
         SalvarEstacionamentoDto dto = new SalvarEstacionamentoDto(1.0, "comum", 15.0);
+
+        doAnswer(invocation -> {
+            Errors errors = invocation.getArgument(1);
+            errors.rejectValue("numero", "estacionamento.numero.existente", "Número de vaga já registrada.");
+            return null;
+        }).when(salvarEstacionamentoDtoValidator).validate(eq(dto), any(Errors.class));
 
         assertThrows(IllegalArgumentException.class, () -> estacionamentoService.salvar(dto));
 
         verify(estacionamentoRepository, times(0)).save(any(Estacionamento.class));
+        verify(salvarEstacionamentoDtoValidator, times(1)).validate(eq(dto), any(Errors.class));
     }
 
     @Test
     void deveAtualizarComSucesso() {
-        Integer id = 1;
+
+        AtualizarEstacionamentoDto dto = new AtualizarEstacionamentoDto(StatusVagaEnum.OCUPADA);
 
         when(estacionamentoRepository.findById(id)).thenReturn(Optional.of(estacionamento));
         when(estacionamentoRepository.save(any(Estacionamento.class))).thenReturn(estacionamento);
-
-        AtualizarEstacionamentoDto dto = new AtualizarEstacionamentoDto(StatusVagaEnum.OCUPADA);
 
         Estacionamento estacionamentoAtualizado = estacionamentoService.atualizar(id, dto);
 
@@ -94,21 +110,22 @@ public class EstacionamentoServiceTest {
 
     @Test
     void atualizarDeveLancarExceptionQuandoNaoEncontrarEstacionamento() {
-        Integer id = 1;
-
-        when(estacionamentoRepository.findById(id)).thenReturn(Optional.empty());
 
         AtualizarEstacionamentoDto dto = new AtualizarEstacionamentoDto(StatusVagaEnum.OCUPADA);
 
-        assertThrows(ResourceNotFoundException.class, () -> estacionamentoService.atualizar(id, dto));
+        when(estacionamentoRepository.findById(id)).thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> estacionamentoService.atualizar(id, dto));
+
+        assertEquals("Estacionamento não encontrado para o ID fornecido.", exception.getMessage());
 
         verify(estacionamentoRepository, times(1)).findById(id);
         verify(estacionamentoRepository, times(0)).save(any(Estacionamento.class));
     }
 
     @Test
-    void deveDeletarComSucesso(){
-        Integer id = 1;
+    void deveDeletarComSucesso() {
 
         when(estacionamentoRepository.findById(id)).thenReturn(Optional.of(estacionamento));
         doNothing().when(estacionamentoRepository).delete(any(Estacionamento.class));
@@ -123,31 +140,34 @@ public class EstacionamentoServiceTest {
 
     @Test
     void deveLancarExceptionQuandoEstacionamentoNaoEncontrado() {
-        Integer id = 1;
 
         when(estacionamentoRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> estacionamentoService.deletar(id));
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> estacionamentoService.deletar(id));
+
+        assertEquals("Estacionamento não encontrado para o ID fornecido.", exception.getMessage());
 
         verify(estacionamentoRepository, times(1)).findById(id);
         verify(estacionamentoRepository, times(0)).delete(any(Estacionamento.class));
     }
 
     @Test
-    void deveRetornarEstacionamentosPaginadosAoObterTodos(){
+    void deveRetornarEstacionamentosPaginadosAoObterTodos() {
 
         Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Order.asc("id")));
         Page<Estacionamento> page = new PageImpl<>(List.of(estacionamento));
+        EstacionamentoFiltroDto dto = new EstacionamentoFiltroDto("comum", StatusVagaEnum.DISPONIVEL,
+                new PaginacaoDataDto(0, 10));
 
-        when(estacionamentoRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(page);
-
-        EstacionamentoFiltroDto dto = new EstacionamentoFiltroDto("comum", StatusVagaEnum.DISPONIVEL, 0, 10);
+        when(estacionamentoRepository.findAll(any(Specification.class), eq(pageable)))
+                .thenReturn(page);
 
         Page<Estacionamento> estacionamentos = estacionamentoService.obterTodos(dto);
 
         assertNotNull(estacionamentos);
         assertEquals(1, estacionamentos.getTotalElements());
-        
+
         verify(estacionamentoRepository, times(1)).findAll(any(Specification.class), eq(pageable));
     }
 }

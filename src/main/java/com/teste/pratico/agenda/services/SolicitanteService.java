@@ -2,6 +2,7 @@ package com.teste.pratico.agenda.services;
 
 import java.util.Optional;
 import org.springframework.data.domain.Page;
+import com.teste.pratico.agenda.dtos.PaginacaoDataDto;
 import com.teste.pratico.agenda.dtos.SalvarSolicitanteDto;
 import com.teste.pratico.agenda.entities.Solicitante;
 
@@ -15,5 +16,5 @@ public interface SolicitanteService {
 
     public Optional<Solicitante> obterPorCpf(String cpf);
 
-    public Page<Solicitante> obterTodos(Integer pagina, Integer tamanho);
+    public Page<Solicitante> obterTodos(PaginacaoDataDto dto);
 }

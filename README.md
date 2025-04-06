@@ -23,6 +23,7 @@ A estrutura do projeto foi dividida em pacotes organizados por responsabilidades
 - **`services`**: contém a lógica de negócio da aplicação.
 - **`specifications`**: filtros dinâmicos utilizando `Specification` do Spring Data.
 - **`utils`**: funções auxiliares reutilizáveis.
+- **`validators`**: validações customizadas de DTOs com regras de negócio específicas.
 
 ### 🛢️ Banco de Dados
 
@@ -144,6 +145,11 @@ Foram implementados testes unitários para todos os métodos dos services utiliz
   - Encerramento de reserva com atualização de status da vaga
   - Verificação de múltiplas reservas por solicitante
   - Paginação e filtro de reservas
+
+- **SolicitanteService**:
+  - Salvamento com validação de CPF duplicado
+  - Exclusão com verificação de existência
+  - Listagem paginada de solicitantes
 
 Para rodar os testes unitários da aplicação:
 
