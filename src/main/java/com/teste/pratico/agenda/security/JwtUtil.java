@@ -12,9 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.interfaces.DecodedJWT;
-
 @Configuration
 public class JwtUtil {
 
@@ -55,15 +52,19 @@ public class JwtUtil {
                 .getBody();
     }
 
-    public static String getEmailWithoutValidation(String authorizationHeader) {
-
+    public String getEmailWithoutValidation(String authorizationHeader) {
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             String token = authorizationHeader.substring(7);
-
-            DecodedJWT decodedJWT = JWT.decode(token);
-            return decodedJWT.getClaim("email").asString();
+    
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(jwtSecretKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+    
+            return claims.getSubject();
         }
-        
+    
         return "";
     }
 }
