@@ -56,6 +56,7 @@ public class Estacionamento {
 
 ```java
 @Entity
+@Table(name = "RESERVA")
 public class Reserva {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
